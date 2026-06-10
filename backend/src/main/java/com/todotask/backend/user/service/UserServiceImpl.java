@@ -5,6 +5,7 @@ import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.dao.enums.Role;
 import com.todotask.backend.user.dao.model.User;
 import com.todotask.backend.user.dao.repository.UserRepository;
+import com.todotask.backend.user.exceptions.UserNotFoundException;
 import com.todotask.backend.user.mapper.UserMapper;
 import com.todotask.backend.user.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
@@ -38,14 +39,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getById(Long id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+            .orElseThrow(() -> new UserNotFoundException(id));
         return userMapper.toResponse(user);
     }
 
     @Override
     public UserResponse update(Long id, UserRequest request) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+            .orElseThrow(() -> new UserNotFoundException(id));
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
