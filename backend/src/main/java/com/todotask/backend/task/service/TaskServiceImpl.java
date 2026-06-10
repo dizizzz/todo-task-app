@@ -4,10 +4,12 @@ import com.todotask.backend.task.dao.dto.TaskRequest;
 import com.todotask.backend.task.dao.dto.TaskResponse;
 import com.todotask.backend.task.dao.model.Task;
 import com.todotask.backend.task.dao.repository.TaskRepository;
+import com.todotask.backend.task.exceptions.TaskNotFoundException;
 import com.todotask.backend.task.mapper.TaskMapper;
 import com.todotask.backend.task.service.interfaces.TaskService;
 import com.todotask.backend.user.dao.model.User;
 import com.todotask.backend.user.dao.repository.UserRepository;
+import com.todotask.backend.user.exceptions.UserNotFoundException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,14 +46,14 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse getById(Long id) {
         Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+            .orElseThrow(() -> new TaskNotFoundException(id));
         return taskMapper.toResponse(task);
     }
 
     @Override
     public TaskResponse update(Long id, TaskRequest request) {
         Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Task not found with id: " + id));
+            .orElseThrow(() -> new TaskNotFoundException(id));
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
@@ -68,7 +70,7 @@ public class TaskServiceImpl implements TaskService {
 
     private User findUser(Long userId) {
         return userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+            .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     private Set<User> findCollaborators(Set<Long> ids) {
