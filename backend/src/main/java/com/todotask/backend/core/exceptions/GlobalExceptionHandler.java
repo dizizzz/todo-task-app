@@ -1,7 +1,5 @@
 package com.todotask.backend.core.exceptions;
 
-import com.todotask.backend.task.exceptions.TaskNotFoundException;
-import com.todotask.backend.user.exceptions.UserNotFoundException;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +37,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(body, headers, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, TaskNotFoundException.class})
+    @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Object> handleNotFound(RuntimeException ex) {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", LocalDateTime.now());
