@@ -2,8 +2,9 @@ package com.todotask.backend.task.dao.model;
 
 import com.todotask.backend.task.dao.enums.Priority;
 import com.todotask.backend.task.dao.enums.State;
-import com.todotask.backend.user.dao.model.User;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,9 +12,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
@@ -42,15 +40,14 @@ public class Task {
     @Column(nullable = false)
     private State state;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @Column(name = "owner_id", nullable = false)
+    private Long ownerId;
 
-    @ManyToMany
-    @JoinTable(
+    @ElementCollection
+    @CollectionTable(
         name = "task_collaborators",
-        joinColumns = @JoinColumn(name = "task_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        joinColumns = @JoinColumn(name = "task_id")
     )
-    private Set<User> collaborators = new HashSet<>();
+    @Column(name = "user_id")
+    private Set<Long> collaboratorIds = new HashSet<>();
 }

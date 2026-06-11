@@ -2,10 +2,12 @@ package com.todotask.backend.task.mapper;
 
 import com.todotask.backend.task.dao.dto.TaskResponse;
 import com.todotask.backend.task.dao.model.Task;
-import com.todotask.backend.user.mapper.UserMapper;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = UserMapper.class)
+@Mapper(componentModel = "spring")
 public interface TaskMapper {
+    @Mapping(target = "owner", ignore = true)
+    @Mapping(target = "collaborators", ignore = true)
     TaskResponse toResponse(Task task);
 }

@@ -7,12 +7,7 @@ import com.todotask.backend.task.dao.repository.TaskRepository;
 import com.todotask.backend.task.exceptions.TaskNotFoundException;
 import com.todotask.backend.task.mapper.TaskMapper;
 import com.todotask.backend.task.service.interfaces.TaskService;
-import com.todotask.backend.user.dao.model.User;
-import com.todotask.backend.user.dao.repository.UserRepository;
-import com.todotask.backend.user.exceptions.UserNotFoundException;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +17,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class TaskServiceImpl implements TaskService {
     private final TaskRepository taskRepository;
-    private final UserRepository userRepository;
     private final TaskMapper taskMapper;
 
     @Override
@@ -31,8 +25,10 @@ public class TaskServiceImpl implements TaskService {
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
-        task.setOwner(findUser(request.ownerId()));
-        task.setCollaborators(findCollaborators(request.collaboratorIds()));
+        task.setOwnerId(request.ownerId());
+        task.setCollaboratorIds(
+            request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
+        );
         Task saved = taskRepository.save(task);
         return taskMapper.toResponse(saved);
     }
@@ -57,8 +53,10 @@ public class TaskServiceImpl implements TaskService {
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
-        task.setOwner(findUser(request.ownerId()));
-        task.setCollaborators(findCollaborators(request.collaboratorIds()));
+        task.setOwnerId(request.ownerId());
+        task.setCollaboratorIds(
+            request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
+        );
         Task updated = taskRepository.save(task);
         return taskMapper.toResponse(updated);
     }
@@ -66,19 +64,5 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void delete(Long id) {
         taskRepository.deleteById(id);
-    }
-
-    private User findUser(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException(userId));
-    }
-
-    private Set<User> findCollaborators(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) {
-            return new HashSet<>();
-        }
-        return ids.stream()
-            .map(this::findUser)
-            .collect(Collectors.toSet());
     }
 }
