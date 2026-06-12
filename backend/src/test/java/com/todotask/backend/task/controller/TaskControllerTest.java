@@ -1,6 +1,7 @@
 package com.todotask.backend.task.controller;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -8,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.todotask.backend.core.exceptions.GlobalExceptionHandler;
+import com.todotask.backend.core.security.AuthenticatedUser;
 import com.todotask.backend.task.dao.dto.TaskRequest;
 import com.todotask.backend.task.dao.dto.TaskResponse;
 import com.todotask.backend.task.dao.enums.Priority;
@@ -22,9 +24,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import tools.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,20 +46,36 @@ class TaskControllerTest {
     private MockMvc mockMvc;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private static final Long CURRENT_USER_ID = 1L;
+
     @BeforeEach
     public void setup() {
         mockMvc = MockMvcBuilders
             .standaloneSetup(taskController)
             .setControllerAdvice(new GlobalExceptionHandler())
+            .setCustomArgumentResolvers(new HandlerMethodArgumentResolver() {
+                @Override
+                public boolean supportsParameter(MethodParameter parameter) {
+                    return parameter.getParameterType().equals(AuthenticatedUser.class);
+                }
+
+                @Override
+                public Object resolveArgument(MethodParameter parameter,
+                                              ModelAndViewContainer mavContainer,
+                                              NativeWebRequest webRequest,
+                                              WebDataBinderFactory binderFactory) {
+                    return new AuthenticatedUser(CURRENT_USER_ID, "mike@mail.com");
+                }
+            })
             .build();
     }
 
     @Test
     void create_ShouldReturnCreated_WhenRequestIsValid() throws Exception {
-        TaskRequest request = new TaskRequest("Task #1", Priority.HIGH, State.NEW, 1L, Set.of());
+        TaskRequest request = new TaskRequest("Task #1", Priority.HIGH, State.NEW, Set.of());
         UserInfo owner = new UserInfo(1L, "Mike", "Brown", "mike@mail.com");
         TaskResponse response = new TaskResponse(1L, "Task #1", Priority.HIGH, State.NEW, owner, Set.of());
-        when(taskService.create(any(TaskRequest.class))).thenReturn(response);
+        when(taskService.create(any(TaskRequest.class), eq(CURRENT_USER_ID))).thenReturn(response);
 
         mockMvc.perform(post("/api/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -65,7 +88,7 @@ class TaskControllerTest {
 
     @Test
     void create_ShouldReturnBadRequest_WhenRequestIsInvalid() throws Exception {
-        TaskRequest invalid = new TaskRequest("", null, State.NEW, null, Set.of());
+        TaskRequest invalid = new TaskRequest("", null, State.NEW, Set.of());
 
         mockMvc.perform(post("/api/tasks")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +100,7 @@ class TaskControllerTest {
     void getById_ShouldReturnOk_WhenTaskExists() throws Exception {
         UserInfo owner = new UserInfo(1L, "Mike", "Brown", "mike@mail.com");
         TaskResponse response = new TaskResponse(1L, "Task #1", Priority.HIGH, State.NEW, owner, Set.of());
-        when(taskService.getById(1L)).thenReturn(response);
+        when(taskService.getById(eq(1L), eq(CURRENT_USER_ID))).thenReturn(response);
 
         mockMvc.perform(get("/api/tasks/1"))
             .andExpect(status().isOk())
@@ -86,7 +109,7 @@ class TaskControllerTest {
 
     @Test
     void getById_ShouldReturnNotFound_WhenTaskDoesNotExist() throws Exception {
-        when(taskService.getById(99L)).thenThrow(new TaskNotFoundException(99L));
+        when(taskService.getById(eq(99L), eq(CURRENT_USER_ID))).thenThrow(new TaskNotFoundException(99L));
 
         mockMvc.perform(get("/api/tasks/99"))
             .andExpect(status().isNotFound());

@@ -1,5 +1,6 @@
 package com.todotask.backend.security.jwt;
 
+import com.todotask.backend.core.security.AuthenticatedUser;
 import com.todotask.backend.security.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -35,11 +36,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (jwtUtil.isValidToken(token)) {
                 String email = jwtUtil.getEmail(token);
+                Long userId = jwtUtil.getUserId(token);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
+                AuthenticatedUser principal = new AuthenticatedUser(userId, email);
                 UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
+                        principal, null, userDetails.getAuthorities());
                 authentication.setDetails(
                     new WebAuthenticationDetailsSource().buildDetails(request));
 
