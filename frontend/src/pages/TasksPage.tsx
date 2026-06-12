@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getTasks, createTask } from '../api/tasks';
+import { getTasks, createTask, deleteTask, updateTask } from '../api/tasks';
 import type { Task } from '../types';
+
+type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
+type State = 'NEW' | 'DOING' | 'DONE';
 
 function TasksPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
@@ -9,9 +12,16 @@ function TasksPage() {
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
+    // create form
     const [name, setName] = useState('');
-    const [priority, setPriority] = useState<'LOW' | 'MEDIUM' | 'HIGH'>('MEDIUM');
-    const [state, setState] = useState<'NEW' | 'DOING' | 'DONE'>('NEW');
+    const [priority, setPriority] = useState<Priority>('MEDIUM');
+    const [state, setState] = useState<State>('NEW');
+
+    // edit state
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editPriority, setEditPriority] = useState<Priority>('MEDIUM');
+    const [editState, setEditState] = useState<State>('NEW');
 
     const loadTasks = () => {
         getTasks()
@@ -44,8 +54,46 @@ function TasksPage() {
         }
     };
 
+    const handleDelete = async (id: number) => {
+        try {
+            await deleteTask(id);
+            loadTasks();
+        } catch {
+            setError('Failed to delete task');
+        }
+    };
+
+    const startEdit = (task: Task) => {
+        setEditingId(task.id);
+        setEditName(task.name);
+        setEditPriority(task.priority);
+        setEditState(task.state);
+    };
+
+    const cancelEdit = () => {
+        setEditingId(null);
+    };
+
+    const handleUpdate = async (id: number) => {
+        if (!editName.trim()) {
+            return;
+        }
+        try {
+            await updateTask(id, {
+                name: editName,
+                priority: editPriority,
+                state: editState,
+                collaboratorIds: [],
+            });
+            setEditingId(null);
+            loadTasks();
+        } catch {
+            setError('Failed to update task');
+        }
+    };
+
     if (loading) {
-        return <p>loading...</p>;
+        return <p>Loading...</p>;
     }
 
     return (
@@ -63,14 +111,14 @@ function TasksPage() {
                 />
             </div>
             <div>
-                <select value={priority} onChange={(e) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH')}>
+                <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
                     <option value="LOW">LOW</option>
                     <option value="MEDIUM">MEDIUM</option>
                     <option value="HIGH">HIGH</option>
                 </select>
             </div>
             <div>
-                <select value={state} onChange={(e) => setState(e.target.value as 'NEW' | 'DOING' | 'DONE')}>
+                <select value={state} onChange={(e) => setState(e.target.value as State)}>
                     <option value="NEW">NEW</option>
                     <option value="DOING">DOING</option>
                     <option value="DONE">DONE</option>
@@ -87,7 +135,34 @@ function TasksPage() {
                 <ul>
                     {tasks.map((task) => (
                         <li key={task.id}>
-                            <strong>{task.name}</strong> — {task.priority} / {task.state}
+                            {editingId === task.id ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        value={editName}
+                                        onChange={(e) => setEditName(e.target.value)}
+                                    />
+                                    <select value={editPriority} onChange={(e) => setEditPriority(e.target.value as Priority)}>
+                                        <option value="LOW">LOW</option>
+                                        <option value="MEDIUM">MEDIUM</option>
+                                        <option value="HIGH">HIGH</option>
+                                    </select>
+                                    <select value={editState} onChange={(e) => setEditState(e.target.value as State)}>
+                                        <option value="NEW">NEW</option>
+                                        <option value="DOING">DOING</option>
+                                        <option value="DONE">DONE</option>
+                                    </select>
+                                    <button onClick={() => handleUpdate(task.id)}>Save</button>
+                                    <button onClick={cancelEdit}>Cancel</button>
+                                </>
+                            ) : (
+                                <>
+                                    <strong>{task.name}</strong> — {task.priority} / {task.state}
+                                    {' '}
+                                    <button onClick={() => startEdit(task)}>Edit</button>
+                                    <button onClick={() => handleDelete(task.id)}>Delete</button>
+                                </>
+                            )}
                         </li>
                     ))}
                 </ul>
