@@ -16,3 +16,12 @@ export async function createTask(data: TaskRequest): Promise<Task> {
     const response = await client.post<Task>('/tasks', data);
     return response.data;
 }
+
+export async function deleteTask(id: number): Promise<void> {
+    await client.delete(`/tasks/${id}`);
+}
+
+export async function updateTask(id: number, data: TaskRequest): Promise<Task> {
+    const response = await client.put<Task>(`/tasks/${id}`, data);
+    return response.data;
+}
