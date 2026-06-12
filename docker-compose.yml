@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: todotask-postgres
+    environment:
+      POSTGRES_DB: tododb
+      POSTGRES_USER: todouser
+      POSTGRES_PASSWORD: todopass
+    ports:
+      - "5432:5432"
+    volumes:
+      - todotask-pgdata:/var/lib/postgresql/data
+
+volumes:
+  todotask-pgdata:
