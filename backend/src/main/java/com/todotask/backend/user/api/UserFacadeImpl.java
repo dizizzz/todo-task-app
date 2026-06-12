@@ -45,6 +45,7 @@ public class UserFacadeImpl implements UserFacade {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException(null));
         return new UserAuthInfo(
+            user.getId(),
             user.getEmail(),
             user.getPassword(),
             user.getRole().name()

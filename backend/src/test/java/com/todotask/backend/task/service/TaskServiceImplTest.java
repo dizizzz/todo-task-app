@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
 public class TaskServiceImplTest {
@@ -44,6 +45,8 @@ public class TaskServiceImplTest {
     private TaskResponse mapperResponse;
     private UserInfo owner;
 
+    private static final Long CURRENT_USER_ID = 1L;
+
     @BeforeEach
     public void setup() {
         task = new Task();
@@ -54,7 +57,7 @@ public class TaskServiceImplTest {
         task.setOwnerId(1L);
         task.setCollaboratorIds(Set.of());
 
-        request = new TaskRequest("Task #1", Priority.HIGH, State.NEW, 1L, Set.of());
+        request = new TaskRequest("Task #1", Priority.HIGH, State.NEW,  Set.of());
 
         // те, що повертає mapper (owner/collaborators у ньому ignore -> null)
         mapperResponse = new TaskResponse(1L, "Task #1", Priority.HIGH, State.NEW, null, null);
@@ -70,7 +73,7 @@ public class TaskServiceImplTest {
         when(userFacade.getById(1L)).thenReturn(owner);
         when(userFacade.getByIds(Set.of())).thenReturn(Set.of());
 
-        TaskResponse result = taskService.create(request);
+        TaskResponse result = taskService.create(request, CURRENT_USER_ID);
 
         //then
         assertNotNull(result);
@@ -87,7 +90,7 @@ public class TaskServiceImplTest {
         when(userFacade.getById(1L)).thenReturn(owner);
         when(userFacade.getByIds(Set.of())).thenReturn(Set.of());
 
-        TaskResponse result = taskService.getById(1L);
+        TaskResponse result = taskService.getById(1L, CURRENT_USER_ID);
 
         //then
         assertNotNull(result);
@@ -101,7 +104,23 @@ public class TaskServiceImplTest {
 
         //then
         assertThrows(TaskNotFoundException.class,
-            () -> taskService.getById(99L));
+            () -> taskService.getById(99L, CURRENT_USER_ID));
+    }
+
+    @Test
+    void getById_WhenUserIsNotOwnerOrCollaborator_ShouldThrowAccessDenied() {
+        //given
+        Task otherTask = new Task();
+        otherTask.setId(5L);
+        otherTask.setOwnerId(99L);
+        otherTask.setCollaboratorIds(Set.of());
+
+        //when
+        when(taskRepository.findById(5L)).thenReturn(Optional.of(otherTask));
+
+        //then
+        assertThrows(AccessDeniedException.class,
+            () -> taskService.getById(5L, CURRENT_USER_ID));
     }
 
     @Test
@@ -111,13 +130,30 @@ public class TaskServiceImplTest {
 
         //then
         assertThrows(TaskNotFoundException.class,
-            () -> taskService.update(99L, request));
+            () -> taskService.update(99L, request, CURRENT_USER_ID));
+    }
+
+    @Test
+    void update_WhenUserIsNotOwner_ShouldThrowAccessDenied() {
+        //given
+        Task otherTask = new Task();
+        otherTask.setId(5L);
+        otherTask.setOwnerId(99L);
+        otherTask.setCollaboratorIds(Set.of());
+
+        //when
+        when(taskRepository.findById(5L)).thenReturn(Optional.of(otherTask));
+
+        //then
+        assertThrows(AccessDeniedException.class,
+            () -> taskService.update(5L, request, CURRENT_USER_ID));
     }
 
     @Test
     void delete_WhenCalled_ShouldCallRepository() {
         //when
-        taskService.delete(1L);
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        taskService.delete(1L, CURRENT_USER_ID);
 
         //then
         verify(taskRepository).deleteById(1L);

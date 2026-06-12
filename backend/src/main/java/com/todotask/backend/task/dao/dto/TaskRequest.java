@@ -15,9 +15,6 @@ public record TaskRequest(
 
     State state,
 
-    @NotNull(message = "Owner id is required")
-    Long ownerId,
-
     Set<Long> collaboratorIds
 ) {
 }

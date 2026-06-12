@@ -6,13 +6,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface TaskService {
-    TaskResponse create(TaskRequest request);
+    TaskResponse create(TaskRequest request, Long currentUserId);
 
-    Page<TaskResponse> getAll(Pageable pageable);
+    Page<TaskResponse> getAll(Pageable pageable, Long currentUserId);
 
-    TaskResponse getById(Long id);
+    TaskResponse getById(Long id, Long currentUserId);
 
-    TaskResponse update(Long id, TaskRequest request);
+    TaskResponse update(Long id, TaskRequest request, Long currentUserId);
 
-    void delete(Long id);
+    void delete(Long id, Long currentUserId);
 }

@@ -14,6 +14,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,12 +25,12 @@ public class TaskServiceImpl implements TaskService {
     private final UserFacade userFacade;
 
     @Override
-    public TaskResponse create(TaskRequest request) {
+    public TaskResponse create(TaskRequest request, Long currentUserId) {
         Task task = new Task();
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
-        task.setOwnerId(request.ownerId());
+        task.setOwnerId(currentUserId);
         task.setCollaboratorIds(
             request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
         );
@@ -38,26 +39,27 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Page<TaskResponse> getAll(Pageable pageable) {
-        return taskRepository.findAll(pageable)
+    public Page<TaskResponse> getAll(Pageable pageable, Long currentUserId) {
+        return taskRepository.findByOwnerOrCollaborator(currentUserId, pageable)
             .map(this::toResponse);
     }
 
     @Override
-    public TaskResponse getById(Long id) {
-        Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new TaskNotFoundException(id));
+    public TaskResponse getById(Long id, Long currentUserId) {
+        Task task = findOwnedTask(id, currentUserId);
         return toResponse(task);
     }
 
     @Override
-    public TaskResponse update(Long id, TaskRequest request) {
+    public TaskResponse update(Long id, TaskRequest request, Long currentUserId) {
         Task task = taskRepository.findById(id)
             .orElseThrow(() -> new TaskNotFoundException(id));
+        if (!task.getOwnerId().equals(currentUserId)) {
+            throw new AccessDeniedException("You can only modify your own tasks");
+        }
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
-        task.setOwnerId(request.ownerId());
         task.setCollaboratorIds(
             request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
         );
@@ -66,7 +68,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Long id, Long currentUserId) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+        if (!task.getOwnerId().equals(currentUserId)) {
+            throw new AccessDeniedException("You can only delete your own tasks");
+        }
         taskRepository.deleteById(id);
     }
 
@@ -82,5 +89,16 @@ public class TaskServiceImpl implements TaskService {
             owner,
             collaborators
         );
+    }
+
+    private Task findOwnedTask(Long id, Long currentUserId) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(() -> new TaskNotFoundException(id));
+        boolean isOwner = task.getOwnerId().equals(currentUserId);
+        boolean isCollaborator = task.getCollaboratorIds().contains(currentUserId);
+        if (!isOwner && !isCollaborator) {
+            throw new AccessDeniedException("You do not have access to this task");
+        }
+        return task;
     }
 }
