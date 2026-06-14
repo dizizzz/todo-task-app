@@ -1,14 +1,18 @@
 package com.todotask.backend.user.controller;
 
+import com.todotask.backend.core.security.AuthenticatedUser;
+import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.service.interfaces.UserService;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +37,11 @@ public class UserController {
     @GetMapping
     public ResponseEntity<Page<UserResponse>> getAll(Pageable pageable) {
         return ResponseEntity.ok(userService.getAll(pageable));
+    }
+
+    @GetMapping("/collaborators")
+    public ResponseEntity<List<UserInfo>> getCollaborators(@AuthenticationPrincipal AuthenticatedUser currentUser) {
+        return ResponseEntity.ok(userService.getAllForCollaborators(currentUser.id()));
     }
 
     @GetMapping("/{id}")

@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTasks, createTask, deleteTask, updateTask } from '../api/tasks';
-import type { Task } from '../types';
+import type { Task, UserInfo } from '../types';
+import { getCollaborators } from '../api/users';
 
 type Priority = 'LOW' | 'MEDIUM' | 'HIGH';
 type State = 'NEW' | 'DOING' | 'DONE';
 
 function TasksPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [users, setUsers] = useState<UserInfo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -16,12 +18,14 @@ function TasksPage() {
     const [name, setName] = useState('');
     const [priority, setPriority] = useState<Priority>('MEDIUM');
     const [state, setState] = useState<State>('NEW');
+    const [collaboratorIds, setCollaboratorIds] = useState<number[]>([]);
 
     // edit state
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [editPriority, setEditPriority] = useState<Priority>('MEDIUM');
     const [editState, setEditState] = useState<State>('NEW');
+    const [editCollaboratorIds, setEditCollaboratorIds] = useState<number[]>([]);
 
     const loadTasks = () => {
         getTasks()
@@ -32,6 +36,9 @@ function TasksPage() {
 
     useEffect(() => {
         loadTasks();
+        getCollaborators()
+            .then((list) => setUsers(list))
+            .catch(() => setError('Failed to load users'));
     }, []);
 
     const handleLogout = () => {
@@ -39,15 +46,28 @@ function TasksPage() {
         navigate('/login');
     };
 
+    const toggleCollaborator = (id: number) => {
+        setCollaboratorIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
+    const toggleEditCollaborator = (id: number) => {
+        setEditCollaboratorIds((prev) =>
+            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+        );
+    };
+
     const handleCreate = async () => {
         if (!name.trim()) {
             return;
         }
         try {
-            await createTask({ name, priority, state, collaboratorIds: [] });
+            await createTask({ name, priority, state, collaboratorIds });
             setName('');
             setPriority('MEDIUM');
             setState('NEW');
+            setCollaboratorIds([]);
             loadTasks();
         } catch {
             setError('Failed to create task');
@@ -68,6 +88,7 @@ function TasksPage() {
         setEditName(task.name);
         setEditPriority(task.priority);
         setEditState(task.state);
+        setEditCollaboratorIds(task.collaborators.map((c) => c.id));
     };
 
     const cancelEdit = () => {
@@ -83,7 +104,7 @@ function TasksPage() {
                 name: editName,
                 priority: editPriority,
                 state: editState,
-                collaboratorIds: [],
+                collaboratorIds: editCollaboratorIds,
             });
             setEditingId(null);
             loadTasks();
@@ -124,6 +145,19 @@ function TasksPage() {
                     <option value="DONE">DONE</option>
                 </select>
             </div>
+            <div>
+                <p>Collaborators:</p>
+                {users.map((user) => (
+                    <label key={user.id} style={{ display: 'block' }}>
+                        <input
+                            type="checkbox"
+                            checked={collaboratorIds.includes(user.id)}
+                            onChange={() => toggleCollaborator(user.id)}
+                        />
+                        {user.firstName} {user.lastName} ({user.email})
+                    </label>
+                ))}
+            </div>
             <button onClick={handleCreate}>Create</button>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -152,12 +186,28 @@ function TasksPage() {
                                         <option value="DOING">DOING</option>
                                         <option value="DONE">DONE</option>
                                     </select>
+                                    <div>
+                                        <p>Collaborators:</p>
+                                        {users.map((user) => (
+                                            <label key={user.id} style={{ display: 'block' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={editCollaboratorIds.includes(user.id)}
+                                                    onChange={() => toggleEditCollaborator(user.id)}
+                                                />
+                                                {user.firstName} {user.lastName} ({user.email})
+                                            </label>
+                                        ))}
+                                    </div>
                                     <button onClick={() => handleUpdate(task.id)}>Save</button>
                                     <button onClick={cancelEdit}>Cancel</button>
                                 </>
                             ) : (
                                 <>
                                     <strong>{task.name}</strong> — {task.priority} / {task.state}
+                                    {task.collaborators.length > 0 && (
+                                        <span> | shared with: {task.collaborators.map((c) => c.firstName).join(', ')}</span>
+                                    )}
                                     {' '}
                                     <button onClick={() => startEdit(task)}>Edit</button>
                                     <button onClick={() => handleDelete(task.id)}>Delete</button>

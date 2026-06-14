@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/users")
                 .permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users/collaborators")
+                .authenticated()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/users")
                 .hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/**")
