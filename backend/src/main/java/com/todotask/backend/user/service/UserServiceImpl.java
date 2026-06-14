@@ -1,5 +1,6 @@
 package com.todotask.backend.user.service;
 
+import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.dao.enums.Role;
@@ -8,6 +9,7 @@ import com.todotask.backend.user.dao.repository.UserRepository;
 import com.todotask.backend.user.exceptions.UserNotFoundException;
 import com.todotask.backend.user.mapper.UserMapper;
 import com.todotask.backend.user.service.interfaces.UserService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,5 +60,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public List<UserInfo> getAllForCollaborators(Long currentUserId) {
+        return userRepository.findAll().stream()
+            .filter(user -> !user.getId().equals(currentUserId))
+            .map(user -> new UserInfo(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()))
+            .toList();
     }
 }
