@@ -34,3 +34,11 @@ export interface TaskRequest {
     state: 'NEW' | 'DOING' | 'DONE';
     collaboratorIds: number[];
 }
+
+// Запит на реєстрацію
+export interface UserRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+}

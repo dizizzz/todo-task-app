@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { login } from '../api/auth';
+import { useNavigate } from 'react-router-dom';
+import { register, login } from '../api/auth';
 
-function LoginPage() {
+function RegisterPage() {
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -11,17 +13,34 @@ function LoginPage() {
     const handleSubmit = async () => {
         setError('');
         try {
+            await register({ firstName, lastName, email, password });
             const response = await login({ email, password });
             localStorage.setItem('token', response.token);
             navigate('/tasks');
         } catch {
-            setError('Incorrect email or password');
+            setError('Registration failed');
         }
     };
 
     return (
         <div>
-            <h1>Login</h1>
+            <h1>Register</h1>
+            <div>
+                <input
+                    type="text"
+                    placeholder="First name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                />
+            </div>
+            <div>
+                <input
+                    type="text"
+                    placeholder="Last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                />
+            </div>
             <div>
                 <input
                     type="email"
@@ -38,13 +57,11 @@ function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                 />
             </div>
-            <button onClick={handleSubmit}>Login</button>
+            <button onClick={handleSubmit}>Register</button>
+
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <p>
-                No account? <Link to="/register">Register</Link>
-            </p>
         </div>
     );
 }
 
-export default LoginPage;
+export default RegisterPage;
