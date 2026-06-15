@@ -1,5 +1,6 @@
 package com.todotask.backend.user.service;
 
+import com.todotask.backend.user.api.UserDeletedEvent;
 import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
@@ -11,10 +12,12 @@ import com.todotask.backend.user.mapper.UserMapper;
 import com.todotask.backend.user.service.interfaces.UserService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public UserResponse create(UserRequest request) {
@@ -58,8 +62,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         userRepository.deleteById(id);
+        eventPublisher.publishEvent(new UserDeletedEvent(id));
     }
 
     @Override
