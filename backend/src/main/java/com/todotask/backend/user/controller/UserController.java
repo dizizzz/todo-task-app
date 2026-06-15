@@ -2,6 +2,7 @@ package com.todotask.backend.user.controller;
 
 import com.todotask.backend.core.security.AuthenticatedUser;
 import com.todotask.backend.user.api.UserInfo;
+import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.service.interfaces.UserService;
@@ -39,6 +40,13 @@ public class UserController {
         return ResponseEntity.ok(userService.getAll(pageable));
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateSelf(
+        @Valid @RequestBody UserRequest request,
+        @AuthenticationPrincipal AuthenticatedUser currentUser) {
+        return ResponseEntity.ok(userService.updateSelf(currentUser.id(), request));
+    }
+
     @GetMapping("/collaborators")
     public ResponseEntity<List<UserInfo>> getCollaborators(@AuthenticationPrincipal AuthenticatedUser currentUser) {
         return ResponseEntity.ok(userService.getAllForCollaborators(currentUser.id()));
@@ -50,9 +58,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> update(@PathVariable Long id,
-                                               @Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.update(id, request));
+    public ResponseEntity<UserResponse> updateByAdmin(@PathVariable Long id,
+                                               @Valid @RequestBody UserAdminUpdateRequest request) {
+        return ResponseEntity.ok(userService.updateByAdmin(id, request));
     }
 
     @DeleteMapping("/{id}")

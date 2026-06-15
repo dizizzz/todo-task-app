@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.todotask.backend.user.api.UserDeletedEvent;
+import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.dao.enums.Role;
@@ -128,15 +129,15 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Verify update with correct id updates user")
-    void update_WhenUserExists_ShouldUpdateUser() {
+    @DisplayName("Verify updateSelf updates own fields and encodes password")
+    void updateSelf_WhenUserExists_ShouldUpdateUser() {
         //when
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("secret123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
-        UserResponse result = userService.update(1L, request);
+        UserResponse result = userService.updateSelf(1L, request);
 
         //then
         assertNotNull(result);
@@ -145,14 +146,47 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Verify update with incorrect id throws exception")
-    void update_WhenUserDoesNotExist_ShouldThrowException() {
+    @DisplayName("Verify updateSelf with incorrect id throws exception")
+    void updateSelf_WhenUserDoesNotExist_ShouldThrowException() {
         //when
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         //then
         assertThrows(UserNotFoundException.class,
-            () -> userService.update(99L, request));
+            () -> userService.updateSelf(99L, request));
+    }
+
+    @Test
+    @DisplayName("Verify updateByAdmin updates role without touching password")
+    void updateByAdmin_WhenUserExists_ShouldUpdateRole() {
+        //given
+        UserAdminUpdateRequest adminRequest = new UserAdminUpdateRequest(Role.ADMIN);
+
+        //when
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+
+        UserResponse result = userService.updateByAdmin(1L, adminRequest);
+
+        //then
+        assertNotNull(result);
+        assertEquals(Role.ADMIN, user.getRole());
+        assertEquals("encodedPassword", user.getPassword());
+    }
+
+    @Test
+    @DisplayName("Verify updateByAdmin with incorrect id throws exception")
+    void updateByAdmin_WhenUserDoesNotExist_ShouldThrowException() {
+        //given
+        UserAdminUpdateRequest adminRequest = new UserAdminUpdateRequest(Role.ADMIN);
+
+        //when
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        //then
+        assertThrows(UserNotFoundException.class,
+            () -> userService.updateByAdmin(99L, adminRequest));
     }
 
     @Test

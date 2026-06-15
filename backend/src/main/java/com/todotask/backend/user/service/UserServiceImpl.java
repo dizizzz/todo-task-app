@@ -2,6 +2,7 @@ package com.todotask.backend.user.service;
 
 import com.todotask.backend.user.api.UserDeletedEvent;
 import com.todotask.backend.user.api.UserInfo;
+import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.dao.enums.Role;
@@ -50,13 +51,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse update(Long id, UserRequest request) {
+    public UserResponse updateByAdmin(Long id, UserAdminUpdateRequest request) {
         User user = userRepository.findById(id)
             .orElseThrow(() -> new UserNotFoundException(id));
-        user.setFirstName(request.firstName());
-        user.setLastName(request.lastName());
-        user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        user.setRole(request.role());
         User updated = userRepository.save(user);
         return userMapper.toResponse(updated);
     }
@@ -78,5 +76,17 @@ public class UserServiceImpl implements UserService {
                 user.getLastName(),
                 user.getEmail()))
             .toList();
+    }
+
+    @Override
+    public UserResponse updateSelf(Long currentUserId, UserRequest request) {
+        User user = userRepository.findById(currentUserId)
+            .orElseThrow(() -> new UserNotFoundException(currentUserId));
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setEmail(request.email());
+        user.setPassword(passwordEncoder.encode(request.password()));
+        User updated = userRepository.save(user);
+        return userMapper.toResponse(updated);
     }
 }
