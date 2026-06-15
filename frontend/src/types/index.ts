@@ -42,3 +42,17 @@ export interface UserRequest {
     email: string;
     password: string;
 }
+
+// Повний користувач (як UserResponse з backend — з роллю)
+export interface User {
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: 'USER' | 'ADMIN';
+}
+
+// Запит адмінського оновлення (імʼя, email, роль — без пароля)
+export interface UserAdminUpdateRequest {
+    role: 'USER' | 'ADMIN';
+}
