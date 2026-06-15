@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import com.todotask.backend.user.api.UserDeletedEvent;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import com.todotask.backend.user.dao.enums.Role;
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +40,9 @@ public class UserServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -151,12 +156,13 @@ public class UserServiceImplTest {
     }
 
     @Test
-    @DisplayName("Verify delete calls repository deleteById")
-    void delete_WhenCalled_ShouldCallRepository() {
+    @DisplayName("Verify delete calls repository deleteById and publishes event")
+    void delete_WhenCalled_ShouldCallRepositoryAndPublishEvent() {
         //when
         userService.delete(1L);
 
         //then
         verify(userRepository).deleteById(1L);
+        verify(eventPublisher).publishEvent(new UserDeletedEvent(1L));
     }
 }
