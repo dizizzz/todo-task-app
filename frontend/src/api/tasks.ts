@@ -25,3 +25,8 @@ export async function updateTask(id: number, data: TaskRequest): Promise<Task> {
     const response = await client.put<Task>(`/tasks/${id}`, data);
     return response.data;
 }
+
+export async function getTaskById(id: number): Promise<Task> {
+    const response = await client.get<Task>(`/tasks/${id}`);
+    return response.data;
+}

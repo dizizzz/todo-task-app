@@ -1,13 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Menu from './components/Menu';
+import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import TasksPage from './pages/TasksPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/RegisterPage';
+import UsersPage from './pages/UsersPage';
+import CreateTaskPage from './pages/CreateTaskPage';
+import UpdateTaskPage from './pages/UpdateTaskPage';
+import UpdateUserPage from './pages/UpdateUserPage';
 
 function App() {
     return (
         <BrowserRouter>
+            <Menu />
             <Routes>
+                <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route
@@ -18,7 +26,38 @@ function App() {
                         </ProtectedRoute>
                     }
                 />
-                <Route path="/" element={<Navigate to="/login" />} />
+                <Route
+                    path="/tasks/new"
+                    element={
+                        <ProtectedRoute>
+                            <CreateTaskPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/tasks/:id/edit"
+                    element={
+                        <ProtectedRoute>
+                            <UpdateTaskPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/users"
+                    element={
+                        <ProtectedRoute>
+                            <UsersPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/users/:id/edit"
+                    element={
+                        <ProtectedRoute>
+                            <UpdateUserPage />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );
