@@ -1,6 +1,7 @@
 package com.todotask.backend.user.service.interfaces;
 
 import com.todotask.backend.user.api.UserInfo;
+import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
 import java.util.List;
@@ -14,9 +15,11 @@ public interface UserService {
 
     UserResponse getById(Long id);
 
-    UserResponse update(Long id, UserRequest request);
+    UserResponse updateByAdmin(Long id, UserAdminUpdateRequest request);
 
     void delete(Long id);
 
     List<UserInfo> getAllForCollaborators(Long currentUserId);
+
+    UserResponse updateSelf(Long currentUserId, UserRequest request);
 }
