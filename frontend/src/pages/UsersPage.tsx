@@ -39,7 +39,7 @@ function UsersPage() {
     };
 
     return (
-        <div>
+        <div className="page">
             <h1>List of Users</h1>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <table>

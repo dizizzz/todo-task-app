@@ -34,8 +34,8 @@ function TasksPage() {
     }
 
     return (
-        <div>
-            <h1>My tasks</h1>
+        <div className="page">
+            <h1>All Tasks</h1>
             <button onClick={() => navigate('/tasks/new')}>Create New Task</button>
 
             {error && <p style={{ color: 'red' }}>{error}</p>}
