@@ -14,6 +14,7 @@ function Menu() {
             <Link to="/" className="logo">ToDos Tasks</Link>
             <Link to="/">Home</Link>
             {token && <Link to="/tasks">My To-Dos</Link>}
+            {token && <Link to="/profile">My Profile</Link>}
             {token && <Link to="/users">List of Users</Link>}
             {token && <button onClick={handleLogout}>Logout</button>}
             {!token && <Link to="/login">Login</Link>}

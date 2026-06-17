@@ -9,6 +9,7 @@ import UsersPage from './pages/UsersPage';
 import CreateTaskPage from './pages/CreateTaskPage';
 import UpdateTaskPage from './pages/UpdateTaskPage';
 import UpdateUserPage from './pages/UpdateUserPage';
+import ProfilePage from './pages/ProfilePage';
 
 function App() {
     return (
@@ -55,6 +56,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <UpdateUserPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <ProfilePage />
                         </ProtectedRoute>
                     }
                 />
