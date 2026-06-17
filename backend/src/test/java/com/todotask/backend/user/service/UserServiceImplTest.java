@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import com.todotask.backend.user.api.UserDeletedEvent;
+import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
@@ -226,5 +227,27 @@ public class UserServiceImplTest {
         //then
         verify(userRepository).deleteById(1L);
         verify(eventPublisher).publishEvent(new UserDeletedEvent(1L));
+    }
+
+    @Test
+    @DisplayName("Verify getAllForCollaborators returns all users except current")
+    void getAllForCollaborators_ShouldExcludeCurrentUser() {
+        //given
+        User other = new User();
+        other.setId(2L);
+        other.setFirstName("User");
+        other.setLastName("Two");
+        other.setEmail("user2@mail.com");
+        other.setRole(Role.USER);
+
+        when(userRepository.findAll()).thenReturn(List.of(user, other));
+
+        //when
+        List<UserInfo> result = userService.getAllForCollaborators(1L);
+
+        //then
+        assertEquals(1, result.size());
+        assertEquals(2L, result.getFirst().id());
+        assertEquals("user2@mail.com", result.getFirst().email());
     }
 }
