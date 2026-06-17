@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import com.todotask.backend.core.exceptions.GlobalExceptionHandler;
@@ -119,5 +120,22 @@ class TaskControllerTest {
     void delete_ShouldReturnNoContent() throws Exception {
         mockMvc.perform(delete("/api/tasks/1"))
             .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void update_ShouldReturnOk_WhenRequestIsValid() throws Exception {
+        TaskRequest request = new TaskRequest("Updated Task", Priority.MEDIUM, State.DOING, Set.of());
+        UserInfo owner = new UserInfo(1L, "Mike", "Brown", "mike@mail.com");
+        TaskResponse response =
+            new TaskResponse(1L, "Updated Task", Priority.MEDIUM, State.DOING, owner, Set.of());
+        when(taskService.update(eq(1L), any(TaskRequest.class), eq(CURRENT_USER_ID)))
+            .thenReturn(response);
+
+        mockMvc.perform(put("/api/tasks/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Updated Task"))
+            .andExpect(jsonPath("$.state").value("DOING"));
     }
 }
