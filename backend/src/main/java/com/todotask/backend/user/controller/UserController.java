@@ -5,6 +5,7 @@ import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
+import com.todotask.backend.user.dao.dto.UserSelfUpdateRequest;
 import com.todotask.backend.user.service.interfaces.UserService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -42,7 +43,7 @@ public class UserController {
 
     @PutMapping("/me")
     public ResponseEntity<UserResponse> updateSelf(
-        @Valid @RequestBody UserRequest request,
+        @Valid @RequestBody UserSelfUpdateRequest request,
         @AuthenticationPrincipal AuthenticatedUser currentUser) {
         return ResponseEntity.ok(userService.updateSelf(currentUser.id(), request));
     }

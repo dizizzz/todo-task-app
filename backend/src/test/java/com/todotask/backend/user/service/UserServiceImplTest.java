@@ -10,6 +10,7 @@ import com.todotask.backend.user.api.UserDeletedEvent;
 import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
+import com.todotask.backend.user.dao.dto.UserSelfUpdateRequest;
 import com.todotask.backend.user.dao.enums.Role;
 import com.todotask.backend.user.dao.model.User;
 import com.todotask.backend.user.dao.repository.UserRepository;
@@ -131,13 +132,17 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Verify updateSelf updates own fields and encodes password")
     void updateSelf_WhenUserExists_ShouldUpdateUser() {
+        //given
+        UserSelfUpdateRequest selfRequest =
+            new UserSelfUpdateRequest("Mike", "Brown", "mike@mail.com", "secret123");
+
         //when
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(passwordEncoder.encode("secret123")).thenReturn("encodedPassword");
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(userMapper.toResponse(user)).thenReturn(userResponse);
 
-        UserResponse result = userService.updateSelf(1L, request);
+        UserResponse result = userService.updateSelf(1L, selfRequest);
 
         //then
         assertNotNull(result);
@@ -148,12 +153,35 @@ public class UserServiceImplTest {
     @Test
     @DisplayName("Verify updateSelf with incorrect id throws exception")
     void updateSelf_WhenUserDoesNotExist_ShouldThrowException() {
+        //given
+        UserSelfUpdateRequest selfRequest =
+            new UserSelfUpdateRequest("Mike", "Brown", "mike@mail.com", "secret123");
+
         //when
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         //then
         assertThrows(UserNotFoundException.class,
-            () -> userService.updateSelf(99L, request));
+            () -> userService.updateSelf(99L, selfRequest));
+    }
+
+    @Test
+    @DisplayName("Verify updateSelf keeps old password when none provided")
+    void updateSelf_WhenNoPassword_ShouldKeepOldPassword() {
+        //given
+        UserSelfUpdateRequest selfRequest =
+            new UserSelfUpdateRequest("NewName", "Brown", "mike@mail.com", null);
+
+        //when
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+        when(userMapper.toResponse(user)).thenReturn(userResponse);
+
+        userService.updateSelf(1L, selfRequest);
+
+        //then
+        assertEquals("encodedPassword", user.getPassword());
+        assertEquals("NewName", user.getFirstName());
     }
 
     @Test

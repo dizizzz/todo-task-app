@@ -5,6 +5,7 @@ import com.todotask.backend.user.api.UserInfo;
 import com.todotask.backend.user.dao.dto.UserAdminUpdateRequest;
 import com.todotask.backend.user.dao.dto.UserRequest;
 import com.todotask.backend.user.dao.dto.UserResponse;
+import com.todotask.backend.user.dao.dto.UserSelfUpdateRequest;
 import com.todotask.backend.user.dao.enums.Role;
 import com.todotask.backend.user.dao.model.User;
 import com.todotask.backend.user.dao.repository.UserRepository;
@@ -79,13 +80,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse updateSelf(Long currentUserId, UserRequest request) {
+    public UserResponse updateSelf(Long currentUserId, UserSelfUpdateRequest request) {
         User user = userRepository.findById(currentUserId)
             .orElseThrow(() -> new UserNotFoundException(currentUserId));
         user.setFirstName(request.firstName());
         user.setLastName(request.lastName());
         user.setEmail(request.email());
-        user.setPassword(passwordEncoder.encode(request.password()));
+        if (request.password() != null && !request.password().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.password()));
+        }
         User updated = userRepository.save(user);
         return userMapper.toResponse(updated);
     }

@@ -56,3 +56,10 @@ export interface User {
 export interface UserAdminUpdateRequest {
     role: 'USER' | 'ADMIN';
 }
+
+export interface SelfUpdateRequest {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password?: string;
+}
