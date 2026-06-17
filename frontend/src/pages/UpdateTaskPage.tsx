@@ -61,20 +61,17 @@ function UpdateTaskPage() {
     };
 
     return (
-        <div>
+        <div className="form-card">
             <h1>Update existing Task</h1>
-
-            <div>
+            <div className="form-group">
                 <label>Id</label>
                 <input type="text" value={taskId} disabled />
             </div>
-
-            <div>
+            <div className="form-group">
                 <label>Name</label>
                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
-
-            <div>
+            <div className="form-group">
                 <label>Priority</label>
                 <select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
                     <option value="LOW">LOW</option>
@@ -82,8 +79,7 @@ function UpdateTaskPage() {
                     <option value="HIGH">HIGH</option>
                 </select>
             </div>
-
-            <div>
+            <div className="form-group">
                 <label>State</label>
                 <select value={state} onChange={(e) => setState(e.target.value as State)}>
                     <option value="NEW">NEW</option>
@@ -91,26 +87,23 @@ function UpdateTaskPage() {
                     <option value="DONE">DONE</option>
                 </select>
             </div>
-
-            <div>
-                <p>Collaborators</p>
+            <div className="form-group">
+                <label>Collaborators</label>
                 {users.map((user) => (
-                    <label key={user.id} style={{ display: 'block' }}>
+                    <label key={user.id} style={{ display: 'block', fontWeight: 'normal' }}>
                         <input
                             type="checkbox"
                             checked={collaboratorIds.includes(user.id)}
                             onChange={() => toggleCollaborator(user.id)}
+                            style={{ width: 'auto', marginRight: '8px' }}
                         />
                         {user.firstName} {user.lastName} ({user.email})
                     </label>
                 ))}
             </div>
-
-            <button onClick={handleClear}>Clear</button>
-            <button onClick={handleUpdate}>Update</button>
-
+            <button className="btn-secondary" onClick={handleClear}>Clear</button>
+            <button className="btn-primary" onClick={handleUpdate}>Update</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-
             <p>
                 <Link to="/tasks">Go to Task List</Link>
             </p>

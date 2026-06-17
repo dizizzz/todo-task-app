@@ -1,0 +1,229 @@
+/* Глобальні*/
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background-color: #f5f6f8;
+    color: #1f2937;
+}
+
+#root {
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+}
+
+a {
+    color: #1a73e8;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* menu */
+.menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background-color: #1a73e8;
+    padding: 12px 24px;
+    margin-bottom: 24px;
+}
+
+.menu a {
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.menu a:hover {
+    text-decoration: underline;
+}
+
+.menu .logo {
+    font-weight: 700;
+    font-size: 18px;
+    margin-right: 10px;
+}
+
+.menu button {
+    margin-left: auto;
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.menu button:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* form-card */
+.form-card {
+    max-width: 420px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 28px 32px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.form-card h1 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: #ffffff;
+}
+
+.form-group input:disabled {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #1a73e8;
+}
+
+/* button */
+button {
+    font-size: 15px;
+    padding: 9px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.form-card button,
+.btn-primary {
+    background-color: #1a73e8;
+    color: #ffffff;
+    border: none;
+}
+
+.form-card button:hover,
+.btn-primary:hover {
+    background-color: #1666c1;
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    margin-right: 8px;
+}
+
+.btn-secondary:hover {
+    background-color: #f3f4f6;
+}
+
+/* page */
+.page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.page h1 {
+    margin-top: 0;
+}
+
+/* table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    margin-top: 16px;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #eceef1;
+    font-size: 15px;
+}
+
+th {
+    background-color: #f0f3f7;
+    font-weight: 600;
+    color: #374151;
+}
+
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Edit/Remove */
+td button {
+    padding: 5px 12px;
+    font-size: 14px;
+    margin-right: 6px;
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+    color: #374151;
+}
+
+td button:hover {
+    background-color: #f3f4f6;
+}
+
+/* Create New Task */
+.page > button {
+    background-color: #1a73e8;
+    color: #ffffff;
+    border: none;
+    margin-top: 12px;
+}
+
+.page > button:hover {
+    background-color: #1666c1;
+}
+
+/* home */
+.home {
+    text-align: center;
+    margin-top: 60px;
+    padding: 0 24px;
+}
+
+.home h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.home p {
+    color: #6b7280;
+    font-size: 17px;
+}

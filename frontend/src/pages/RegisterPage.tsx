@@ -23,42 +23,25 @@ function RegisterPage() {
     };
 
     return (
-        <div>
+        <div className="form-card">
             <h1>Register</h1>
-            <div>
-                <input
-                    type="text"
-                    placeholder="First name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                />
+            <div className="form-group">
+                <label>First name</label>
+                <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
             </div>
-            <div>
-                <input
-                    type="text"
-                    placeholder="Last name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                />
+            <div className="form-group">
+                <label>Last name</label>
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} />
             </div>
-            <div>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
+            <div className="form-group">
+                <label>Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <div>
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+            <div className="form-group">
+                <label>Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
             <button onClick={handleSubmit}>Register</button>
-
             {error && <p style={{ color: 'red' }}>{error}</p>}
         </div>
     );

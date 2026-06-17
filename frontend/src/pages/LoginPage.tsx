@@ -20,9 +20,10 @@ function LoginPage() {
     };
 
     return (
-        <div>
+        <div className="form-card">
             <h1>Login</h1>
-            <div>
+            <div className="form-group">
+                <label>Email</label>
                 <input
                     type="email"
                     placeholder="Email"
@@ -30,7 +31,8 @@ function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                 />
             </div>
-            <div>
+            <div className="form-group">
+                <label>Password</label>
                 <input
                     type="password"
                     placeholder="Password"
