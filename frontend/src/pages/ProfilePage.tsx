@@ -9,8 +9,10 @@ function ProfilePage() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (!userId) {
@@ -32,6 +34,10 @@ function ProfilePage() {
             setError('Name and email are required');
             return;
         }
+        if (password.trim() && password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
         try {
             await updateSelf({
                 firstName,
@@ -41,6 +47,7 @@ function ProfilePage() {
             });
             setSuccess('Profile updated');
             setPassword('');
+            setConfirmPassword('');
         } catch {
             setError('Failed to update profile');
         }
@@ -64,11 +71,31 @@ function ProfilePage() {
             <div className="form-group">
                 <label>Password</label>
                 <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Leave empty to keep current password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+            </div>
+            <div className="form-group">
+                <label>Confirm password</label>
+                <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Repeat new password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+            </div>
+            <div className="form-group">
+                <label style={{ fontWeight: 'normal', cursor: 'pointer' }}>
+                    <input
+                        type="checkbox"
+                        checked={showPassword}
+                        onChange={() => setShowPassword(!showPassword)}
+                        style={{ width: 'auto', marginRight: '8px' }}
+                    />
+                    Show password
+                </label>
             </div>
             <button className="btn-primary" onClick={handleSave}>Save</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}

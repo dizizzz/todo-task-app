@@ -5,6 +5,7 @@ import { login } from '../api/auth';
 function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
@@ -34,11 +35,22 @@ function LoginPage() {
             <div className="form-group">
                 <label>Password</label>
                 <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
+            </div>
+            <div className="form-group">
+                <label style={{ fontWeight: 'normal', cursor: 'pointer' }}>
+                    <input
+                        type="checkbox"
+                        checked={showPassword}
+                        onChange={() => setShowPassword(!showPassword)}
+                        style={{ width: 'auto', marginRight: '8px' }}
+                    />
+                    Show password
+                </label>
             </div>
             <button onClick={handleSubmit}>Login</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
