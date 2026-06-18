@@ -7,11 +7,17 @@ function RegisterPage() {
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleSubmit = async () => {
         setError('');
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
         try {
             await register({ firstName, lastName, email, password });
             const response = await login({ email, password });
@@ -39,7 +45,30 @@ function RegisterPage() {
             </div>
             <div className="form-group">
                 <label>Password</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
+            <div className="form-group">
+                <label>Confirm password</label>
+                <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+            </div>
+            <div className="form-group">
+                <label style={{ fontWeight: 'normal', cursor: 'pointer' }}>
+                    <input
+                        type="checkbox"
+                        checked={showPassword}
+                        onChange={() => setShowPassword(!showPassword)}
+                        style={{ width: 'auto', marginRight: '8px' }}
+                    />
+                    Show password
+                </label>
             </div>
             <button onClick={handleSubmit}>Register</button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
