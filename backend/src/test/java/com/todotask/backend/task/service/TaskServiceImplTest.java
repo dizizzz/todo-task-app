@@ -1,6 +1,7 @@
 package com.todotask.backend.task.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -134,7 +135,7 @@ public class TaskServiceImplTest {
     }
 
     @Test
-    void update_WhenUserIsNotOwner_ShouldThrowAccessDenied() {
+    void update_WhenUserIsNotOwnerOrCollaborator_ShouldThrowAccessDenied() {
         //given
         Task otherTask = new Task();
         otherTask.setId(5L);
@@ -157,5 +158,68 @@ public class TaskServiceImplTest {
 
         //then
         verify(taskRepository).deleteById(1L);
+    }
+
+    @Test
+    void update_WhenUserIsCollaborator_ShouldUpdateTask() {
+        //given
+        Task collabTask = new Task();
+        collabTask.setId(7L);
+        collabTask.setName("Old");
+        collabTask.setPriority(Priority.LOW);
+        collabTask.setState(State.NEW);
+        collabTask.setOwnerId(99L);
+        collabTask.setCollaboratorIds(new java.util.HashSet<>(Set.of(CURRENT_USER_ID)));
+
+        when(taskRepository.findById(7L)).thenReturn(Optional.of(collabTask));
+        when(taskRepository.save(any(Task.class))).thenReturn(collabTask);
+        when(taskMapper.toResponse(collabTask)).thenReturn(mapperResponse);
+        when(userFacade.getById(99L)).thenReturn(owner);
+        when(userFacade.getByIds(any())).thenReturn(Set.of());
+
+        //when
+        TaskResponse result = taskService.update(7L, request, CURRENT_USER_ID);
+
+        //then
+        assertNotNull(result);
+    }
+
+    @Test
+    void create_ShouldRemoveOwnerFromCollaborators() {
+        //given
+        TaskRequest withOwnerAsCollab =
+            new TaskRequest("Task", Priority.HIGH, State.NEW, Set.of(CURRENT_USER_ID));
+        Task savedTask = new Task();
+        savedTask.setId(1L);
+        savedTask.setOwnerId(CURRENT_USER_ID);
+        savedTask.setCollaboratorIds(new java.util.HashSet<>());
+
+        when(taskRepository.save(any(Task.class))).thenReturn(savedTask);
+        when(taskMapper.toResponse(savedTask)).thenReturn(mapperResponse);
+        when(userFacade.getById(CURRENT_USER_ID)).thenReturn(owner);
+        when(userFacade.getByIds(any())).thenReturn(Set.of());
+
+        //when
+        taskService.create(withOwnerAsCollab, CURRENT_USER_ID);
+
+        //then
+        org.mockito.ArgumentCaptor<Task> captor = org.mockito.ArgumentCaptor.forClass(Task.class);
+        verify(taskRepository).save(captor.capture());
+        assertFalse(captor.getValue().getCollaboratorIds().contains(CURRENT_USER_ID));
+    }
+
+    @Test
+    void delete_WhenUserIsCollaborator_ShouldThrowAccessDenied() {
+        //given
+        Task collabTask = new Task();
+        collabTask.setId(7L);
+        collabTask.setOwnerId(99L);
+        collabTask.setCollaboratorIds(new java.util.HashSet<>(Set.of(CURRENT_USER_ID)));
+
+        when(taskRepository.findById(7L)).thenReturn(Optional.of(collabTask));
+
+        //then колаборатор не вид
+        assertThrows(AccessDeniedException.class,
+            () -> taskService.delete(7L, CURRENT_USER_ID));
     }
 }
