@@ -31,9 +31,10 @@ public class TaskServiceImpl implements TaskService {
         task.setPriority(request.priority());
         task.setState(request.state());
         task.setOwnerId(currentUserId);
-        task.setCollaboratorIds(
-            request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
-        );
+        Set<Long> collaborators =
+            request.collaboratorIds() == null ? new HashSet<>() : new HashSet<>(request.collaboratorIds());
+        collaborators.remove(currentUserId);
+        task.setCollaboratorIds(collaborators);
         Task saved = taskRepository.save(task);
         return toResponse(saved);
     }
@@ -54,15 +55,18 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse update(Long id, TaskRequest request, Long currentUserId) {
         Task task = taskRepository.findById(id)
             .orElseThrow(() -> new TaskNotFoundException(id));
-        if (!task.getOwnerId().equals(currentUserId)) {
-            throw new AccessDeniedException("You can only modify your own tasks");
+        boolean isOwner = task.getOwnerId().equals(currentUserId);
+        boolean isCollaborator = task.getCollaboratorIds().contains(currentUserId);
+        if (!isOwner && !isCollaborator) {
+            throw new AccessDeniedException("You can only modify tasks you own or collaborate on");
         }
         task.setName(request.name());
         task.setPriority(request.priority());
         task.setState(request.state());
-        task.setCollaboratorIds(
-            request.collaboratorIds() == null ? new HashSet<>() : request.collaboratorIds()
-        );
+        Set<Long> collaborators =
+            request.collaboratorIds() == null ? new HashSet<>() : new HashSet<>(request.collaboratorIds());
+        collaborators.remove(task.getOwnerId());
+        task.setCollaboratorIds(collaborators);
         Task updated = taskRepository.save(task);
         return toResponse(updated);
     }

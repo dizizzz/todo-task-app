@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getTasks, deleteTask} from '../api/tasks';
 import type { Task } from '../types';
+import { getCurrentUserId } from '../api/auth-helpers';
 
 function TasksPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const currentUserId = getCurrentUserId();
 
     const loadTasks = () => {
         getTasks()
@@ -64,7 +66,9 @@ function TasksPage() {
                             <td>{task.state}</td>
                             <td>
                                 <button onClick={() => navigate(`/tasks/${task.id}/edit`)}>Edit</button>
-                                <button onClick={() => handleDelete(task.id)}>Remove</button>
+                                {task.owner.id === currentUserId && (
+                                    <button onClick={() => handleDelete(task.id)}>Remove</button>
+                                )}
                             </td>
                         </tr>
                     ))}

@@ -18,6 +18,7 @@ function UpdateTaskPage() {
     const [collaboratorIds, setCollaboratorIds] = useState<number[]>([]);
     const [users, setUsers] = useState<UserInfo[]>([]);
     const [error, setError] = useState('');
+    const [owner, setOwner] = useState<UserInfo | null>(null);
 
     // завантажуємо задачу і список користувачів
     useEffect(() => {
@@ -27,6 +28,7 @@ function UpdateTaskPage() {
                 setPriority(task.priority);
                 setState(task.state);
                 setCollaboratorIds(task.collaborators.map((c) => c.id));
+                setOwner(task.owner);
             })
             .catch(() => setError('Failed to load task'));
 
@@ -88,8 +90,14 @@ function UpdateTaskPage() {
                 </select>
             </div>
             <div className="form-group">
+                <label>Owner</label>
+                {owner && (
+                    <p style={{ margin: '0 0 12px' }}>
+                        {owner.firstName} {owner.lastName} ({owner.email})
+                    </p>
+                )}
                 <label>Collaborators</label>
-                {users.map((user) => (
+                {users.filter((user) => user.id !== owner?.id).map((user) => (
                     <label key={user.id} style={{ display: 'block', fontWeight: 'normal' }}>
                         <input
                             type="checkbox"
