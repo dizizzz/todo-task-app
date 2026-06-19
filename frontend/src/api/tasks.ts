@@ -7,8 +7,14 @@ interface Page<T> {
     totalPages: number;
 }
 
-export async function getTasks(): Promise<Page<Task>> {
-    const response = await client.get<Page<Task>>('/tasks');
+export async function getTasks(
+    page = 0,
+    size = 5,
+    sort = 'id,asc'
+): Promise<Page<Task>> {
+    const response = await client.get<Page<Task>>('/tasks', {
+        params: { page, size, sort },
+    });
     return response.data;
 }
 

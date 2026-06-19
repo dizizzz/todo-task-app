@@ -227,3 +227,19 @@ td button:hover {
     color: #6b7280;
     font-size: 17px;
 }
+
+/* pagination */
+.sort-bar {
+    margin: 16px 0;
+}
+
+.sort-bar label {
+    margin-right: 8px;
+}
+
+.pagination {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
