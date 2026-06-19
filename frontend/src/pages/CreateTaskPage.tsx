@@ -11,28 +11,42 @@ function CreateTaskPage() {
     const [name, setName] = useState('');
     const [priority, setPriority] = useState<Priority>('MEDIUM');
     const [state, setState] = useState<State>('NEW');
-    const [collaboratorIds, setCollaboratorIds] = useState<number[]>([]);
-    const [users, setUsers] = useState<UserInfo[]>([]);
+    const [collaborators, setCollaborators] = useState<UserInfo[]>([]);
+    const [allUsers, setAllUsers] = useState<UserInfo[]>([]);
+    const [selectedToAdd, setSelectedToAdd] = useState<number | ''>('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
         getCollaborators()
-            .then((list) => setUsers(list))
+            .then((list) => setAllUsers(list))
             .catch(() => setError('Failed to load users'));
     }, []);
 
-    const toggleCollaborator = (id: number) => {
-        setCollaboratorIds((prev) =>
-            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-        );
+    const availableUsers = allUsers.filter(
+        (user) => !collaborators.some((c) => c.id === user.id)
+    );
+
+    const handleAddCollaborator = () => {
+        if (selectedToAdd === '') {
+            return;
+        }
+        const user = allUsers.find((u) => u.id === selectedToAdd);
+        if (user) {
+            setCollaborators((prev) => [...prev, user]);
+        }
+        setSelectedToAdd('');
+    };
+
+    const handleRemoveCollaborator = (userId: number) => {
+        setCollaborators((prev) => prev.filter((c) => c.id !== userId));
     };
 
     const handleClear = () => {
         setName('');
         setPriority('MEDIUM');
         setState('NEW');
-        setCollaboratorIds([]);
+        setCollaborators([]);
     };
 
     const handleCreate = async () => {
@@ -40,7 +54,12 @@ function CreateTaskPage() {
             return;
         }
         try {
-            await createTask({ name, priority, state, collaboratorIds });
+            await createTask({
+                name,
+                priority,
+                state,
+                collaboratorIds: collaborators.map((c) => c.id),
+            });
             navigate('/tasks');
         } catch {
             setError('Failed to create task');
@@ -72,17 +91,46 @@ function CreateTaskPage() {
             </div>
             <div className="form-group">
                 <label>Collaborators</label>
-                {users.map((user) => (
-                    <label key={user.id} style={{ display: 'block', fontWeight: 'normal' }}>
-                        <input
-                            type="checkbox"
-                            checked={collaboratorIds.includes(user.id)}
-                            onChange={() => toggleCollaborator(user.id)}
-                            style={{ width: 'auto', marginRight: '8px' }}
-                        />
-                        {user.firstName} {user.lastName} ({user.email})
-                    </label>
-                ))}
+                {collaborators.length === 0 ? (
+                    <p>No collaborators yet</p>
+                ) : (
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Operations</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {collaborators.map((c, index) => (
+                            <tr key={c.id}>
+                                <td>{index + 1}</td>
+                                <td>{c.firstName} {c.lastName}</td>
+                                <td>
+                                    <button onClick={() => handleRemoveCollaborator(c.id)}>Remove</button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                )}
+
+                <label>Add new collaborator</label>
+                <div className="add-collaborator">
+                    <select
+                        value={selectedToAdd}
+                        onChange={(e) => setSelectedToAdd(e.target.value === '' ? '' : Number(e.target.value))}
+                    >
+                        <option value="">Select collaborator...</option>
+                        {availableUsers.map((user) => (
+                            <option key={user.id} value={user.id}>
+                                {user.firstName} {user.lastName} ({user.email})
+                            </option>
+                        ))}
+                    </select>
+                    <button className="btn-primary" onClick={handleAddCollaborator}>Add</button>
+                </div>
             </div>
             <button className="btn-secondary" onClick={handleClear}>Clear</button>
             <button className="btn-primary" onClick={handleCreate}>Create</button>
