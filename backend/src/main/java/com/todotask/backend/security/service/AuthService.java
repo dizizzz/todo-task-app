@@ -22,6 +22,7 @@ public class AuthService {
             new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
         UserAuthInfo authInfo = userFacade.getAuthInfoByEmail(request.email());
-        String token = jwtUtil.generateToken(request.email(), authInfo.id(), authInfo.role());        return new LoginResponse(token);
+        String token = jwtUtil.generateToken(request.email(), authInfo.id(), authInfo.role());
+        return new LoginResponse(token);
     }
 }

@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 
 @ExtendWith(MockitoExtension.class)
@@ -221,5 +222,24 @@ public class TaskServiceImplTest {
         //then колаборатор не вид
         assertThrows(AccessDeniedException.class,
             () -> taskService.delete(7L, CURRENT_USER_ID));
+    }
+
+    @Test
+    void getByUser_ShouldReturnUserTasks() {
+        //given
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        org.springframework.data.domain.Page<Task> taskPage =
+            new org.springframework.data.domain.PageImpl<>(java.util.List.of(task), pageable, 1);
+
+        when(taskRepository.findByOwnerOrCollaborator(99L, pageable)).thenReturn(taskPage);
+        when(taskMapper.toResponse(task)).thenReturn(mapperResponse);
+        when(userFacade.getById(1L)).thenReturn(owner);
+        when(userFacade.getByIds(any())).thenReturn(Set.of());
+
+        //when
+        var result = taskService.getByUser(99L, pageable);
+
+        //then
+        assertEquals(1, result.getTotalElements());
     }
 }

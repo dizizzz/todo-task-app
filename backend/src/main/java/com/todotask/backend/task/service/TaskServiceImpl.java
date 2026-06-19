@@ -105,4 +105,10 @@ public class TaskServiceImpl implements TaskService {
         }
         return task;
     }
+
+    @Override
+    public Page<TaskResponse> getByUser(Long userId, Pageable pageable) {
+        return taskRepository.findByOwnerOrCollaborator(userId, pageable)
+            .map(this::toResponse);
+    }
 }

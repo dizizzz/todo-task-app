@@ -36,3 +36,15 @@ export async function getTaskById(id: number): Promise<Task> {
     const response = await client.get<Task>(`/tasks/${id}`);
     return response.data;
 }
+
+export async function getTasksByUser(
+    userId: number,
+    page = 0,
+    size = 5,
+    sort = 'id,asc'
+): Promise<Page<Task>> {
+    const response = await client.get<Page<Task>>(`/tasks/user/${userId}`, {
+        params: { page, size, sort },
+    });
+    return response.data;
+}
