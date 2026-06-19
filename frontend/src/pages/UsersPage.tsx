@@ -1,28 +1,19 @@
 import { useEffect, useState } from 'react';
-import { getAllUsers, getCollaborators, deleteUser } from '../api/users';
+import { getAllUsers, deleteUser } from '../api/users';
 import { useNavigate } from 'react-router-dom';
 import type { UserInfo } from '../types';
+import { getCurrentUserRole } from '../api/auth-helpers';
 
 function UsersPage() {
     const [users, setUsers] = useState<UserInfo[]>([]);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const isAdmin = getCurrentUserRole() === 'ADMIN';
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const loadUsers = () => {
         getAllUsers()
-            .then((page) => {
-                setUsers(page.content);
-                setIsAdmin(true);
-            })
-            .catch(() => {
-                getCollaborators()
-                    .then((list) => {
-                        setUsers(list);
-                        setIsAdmin(false);
-                    })
-                    .catch(() => setError('Failed to load users'));
-            });
+            .then((page) => setUsers(page.content))
+            .catch(() => setError('Failed to load users'));
     };
 
     useEffect(() => {

@@ -37,8 +37,7 @@ public class AuthServiceTest {
         LoginRequest request = new LoginRequest("mike@mail.com", "secret123");
         UserAuthInfo authInfo = new UserAuthInfo(1L, "mike@mail.com", "encodedPassword", "USER");
         when(userFacade.getAuthInfoByEmail("mike@mail.com")).thenReturn(authInfo);
-        when(jwtUtil.generateToken("mike@mail.com", 1L)).thenReturn("token123");
-
+        when(jwtUtil.generateToken("mike@mail.com", 1L, "USER")).thenReturn("token123");
         //when
         LoginResponse result = authService.login(request);
 
