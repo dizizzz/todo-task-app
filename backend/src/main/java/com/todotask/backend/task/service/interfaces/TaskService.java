@@ -15,4 +15,6 @@ public interface TaskService {
     TaskResponse update(Long id, TaskRequest request, Long currentUserId);
 
     void delete(Long id, Long currentUserId);
+
+    Page<TaskResponse> getByUser(Long userId, Pageable pageable);
 }

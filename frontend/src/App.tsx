@@ -10,6 +10,7 @@ import CreateTaskPage from './pages/CreateTaskPage';
 import UpdateTaskPage from './pages/UpdateTaskPage';
 import UpdateUserPage from './pages/UpdateUserPage';
 import ProfilePage from './pages/ProfilePage';
+import UserTasksPage from './pages/UserTasksPage';
 
 function App() {
     return (
@@ -56,6 +57,14 @@ function App() {
                     element={
                         <ProtectedRoute>
                             <UpdateUserPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/users/:id/tasks"
+                    element={
+                        <ProtectedRoute>
+                            <UserTasksPage />
                         </ProtectedRoute>
                     }
                 />

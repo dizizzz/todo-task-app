@@ -58,4 +58,10 @@ public class TaskController {
         taskService.delete(id, currentUser.id());
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Page<TaskResponse>> getByUser(@PathVariable Long userId,
+                                                        Pageable pageable) {
+        return ResponseEntity.ok(taskService.getByUser(userId, pageable));
+    }
 }

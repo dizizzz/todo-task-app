@@ -50,6 +50,7 @@ function UsersPage() {
                         <td>{user.email}</td>
                         {isAdmin && (
                             <td>
+                                <button onClick={() => navigate(`/users/${user.id}/tasks`)}>View tasks</button>
                                 <button onClick={() => navigate(`/users/${user.id}/edit`)}>Edit</button>
                                 <button onClick={() => handleRemove(user.id)}>Remove</button>
                             </td>

@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .hasRole("ADMIN")
                 .requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/users/**")
                 .hasRole("ADMIN")
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/tasks/user/**")
+                .hasRole("ADMIN")
                 .anyRequest()
                 .authenticated()
             )

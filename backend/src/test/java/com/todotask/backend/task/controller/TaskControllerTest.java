@@ -67,7 +67,9 @@ class TaskControllerTest {
                                               WebDataBinderFactory binderFactory) {
                     return new AuthenticatedUser(CURRENT_USER_ID, "mike@mail.com");
                 }
-            })
+            },
+                new org.springframework.data.web.PageableHandlerMethodArgumentResolver()
+            )
             .build();
     }
 
@@ -137,5 +139,19 @@ class TaskControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Updated Task"))
             .andExpect(jsonPath("$.state").value("DOING"));
+    }
+
+    @Test
+    void getByUser_ShouldReturnOk() throws Exception {
+        UserInfo owner = new UserInfo(1L, "Mike", "Brown", "mike@mail.com");
+        TaskResponse response = new TaskResponse(1L, "Task #1", Priority.HIGH, State.NEW, owner, Set.of());
+        var pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        when(taskService.getByUser(eq(4L), any()))
+            .thenReturn(new org.springframework.data.domain.PageImpl<>(
+                java.util.List.of(response), pageable, 1));
+
+        mockMvc.perform(get("/api/tasks/user/4"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].name").value("Task #1"));
     }
 }
