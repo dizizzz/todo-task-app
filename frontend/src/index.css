@@ -243,3 +243,14 @@ td button:hover {
     align-items: center;
     gap: 12px;
 }
+
+/* owner/collaborator */
+.owner-info {
+    margin: 0 0 12px;
+}
+
+.add-collaborator {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
